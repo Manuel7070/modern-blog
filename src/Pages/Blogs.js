@@ -1,6 +1,7 @@
 import React from "react";
 import BlogList from "../components/BlogList";
 import Post from "../components/Post";
+import Footer from "../components/Footer";
 
 export default function Blogs() {
   const posts = [
