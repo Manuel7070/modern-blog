@@ -14,10 +14,17 @@ export default function Blogs() {
       setLoading(true); // Start loading
       try {
         const querySnapshot = await getDocs(collection(db, "posts")); // Get all posts from Firestore
-        const postsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })); // Map the document data
+        const postsData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          console.log("Fetched post data:", data); // Log the data for debugging
+          return {
+            id: doc.id,
+            title: data.title || "Untitled", // Ensure title exists
+            description: data.description || "No description available",
+            date: data.date || "No date available",
+            imageUrl: data.imageUrl || "https://via.placeholder.com/600x400",
+          };
+        });
         setPosts(postsData); // Set posts in state
       } catch (error) {
         console.error("Error fetching blog posts: ", error);
