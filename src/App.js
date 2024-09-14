@@ -6,15 +6,18 @@ import Footer from "./components/Footer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
+  const clerkFrontendApi = process.env.VITE_CLERK_PUBLISHABLE_KEY;
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/blogs" element={<Blogs />} />
-      </Routes>
-      <Footer />
-    </Router>
+    <>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/blogs" element={<Blogs />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </>
   );
 }
 
