@@ -17,9 +17,8 @@ const Navbar = ({ username, email, profilePicture }) => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Sign out the user
-      // Redirect or handle post-logout actions here
-      window.location.href = "/login"; // Redirect to login page
+      await signOut(auth);
+      window.location.href = "/login";
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -54,7 +53,6 @@ const Navbar = ({ username, email, profilePicture }) => {
             />
           </button>
 
-          {/* Dropdown menu */}
           {isUserDropdownOpen && (
             <div className="z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
               <div className="px-4 py-3">
