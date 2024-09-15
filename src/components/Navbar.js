@@ -1,4 +1,7 @@
+// src/components/Navbar.js
 import React, { useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 
 const Navbar = ({ username, email, profilePicture }) => {
   const [isUserDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -10,6 +13,16 @@ const Navbar = ({ username, email, profilePicture }) => {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Sign out the user
+      // Redirect or handle post-logout actions here
+      window.location.href = "/login"; // Redirect to login page
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
   };
 
   return (
@@ -36,7 +49,7 @@ const Navbar = ({ username, email, profilePicture }) => {
             <span className="sr-only">Open user menu</span>
             <img
               className="w-8 h-8 rounded-full"
-              src="/images/profile.png"
+              src={profilePicture || "/images/profile.png"}
               alt="user photo"
             />
           </button>
@@ -55,19 +68,19 @@ const Navbar = ({ username, email, profilePicture }) => {
               <ul className="py-2">
                 <li>
                   <a
-                    href="#"
+                    href="/dashboard"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                   >
                     Dashboard
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white text-left"
                   >
                     Sign out
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>
