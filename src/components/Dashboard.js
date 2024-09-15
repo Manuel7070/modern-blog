@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore"; // Firebase
+import { collection, getDocs, query, where } from "firebase/firestore"; // Firebase
 import { db } from "../firebase/firebase"; // Firebase config
+import { useAuth } from "../context/AuthContext"; // Import from your AuthContext file
 
 function Dashboard() {
   const [posts, setPosts] = useState([]); // State to store the posts
+  const [clickedPosts, setClickedPosts] = useState([]); // State to store clicked posts
   const [loading, setLoading] = useState(true); // Loading state
+  const { user } = useAuth(); // Use your custom useAuth hook
 
   // Fetch all posts from Firestore
   useEffect(() => {
@@ -26,6 +29,36 @@ function Dashboard() {
     fetchPosts();
   }, []);
 
+  // Fetch clicked posts for the logged-in user
+  useEffect(() => {
+    if (user) {
+      const fetchClickedPosts = async () => {
+        setLoading(true);
+        try {
+          const userInteractionsSnapshot = await getDocs(
+            collection(db, "userInteractions")
+          );
+          const userInteractions = userInteractionsSnapshot.docs.find(
+            (doc) => doc.id === user.uid
+          );
+
+          if (userInteractions) {
+            const clickedPostIds = Object.keys(userInteractions.data());
+            const clickedPostsData = posts.filter((post) =>
+              clickedPostIds.includes(post.id)
+            );
+            setClickedPosts(clickedPostsData);
+          }
+        } catch (error) {
+          console.error("Error fetching clicked posts: ", error);
+        }
+        setLoading(false);
+      };
+
+      fetchClickedPosts();
+    }
+  }, [user, posts]);
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Dashboard layout */}
@@ -41,7 +74,7 @@ function Dashboard() {
                 href="#posts"
                 className="text-gray-700 dark:text-gray-300 hover:underline"
               >
-                All Posts
+                Clicked Posts
               </a>
             </li>
             {/* You can add more links here */}
@@ -51,14 +84,14 @@ function Dashboard() {
         {/* Main content */}
         <div className="flex-1 p-6">
           <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-            All Posts
+            Clicked Posts
           </h2>
 
           {loading ? (
             <p>Loading posts...</p>
-          ) : posts.length > 0 ? (
+          ) : clickedPosts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post) => (
+              {clickedPosts.map((post) => (
                 <div
                   key={post.id}
                   className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden"
@@ -87,7 +120,7 @@ function Dashboard() {
             </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-300">
-              No posts available.
+              No clicked posts available.
             </p>
           )}
         </div>

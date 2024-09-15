@@ -1,12 +1,37 @@
 import React, { useState } from "react";
+import { db } from "../firebase/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
 
 function BlogList({ posts }) {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = (post) => {
+  const { user } = useAuth();
+  const openModal = async (post) => {
     setSelectedPost(post);
     setIsModalOpen(true);
+
+    // Log the post click event
+    if (user) {
+      try {
+        await setDoc(
+          doc(db, "userInteractions", user.uid),
+          {
+            [post.id]: {
+              timestamp: new Date(),
+              title: post.title,
+              description: post.description,
+              date: post.date,
+              imageUrl: post.imageUrl,
+            },
+          },
+          { merge: true }
+        );
+        console.log("Post click event logged");
+      } catch (error) {
+        console.error("Error logging post click event: ", error);
+      }
+    }
   };
 
   const closeModal = () => {
