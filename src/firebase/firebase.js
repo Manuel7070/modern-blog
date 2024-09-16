@@ -4,13 +4,13 @@ import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider, useAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDeO2dg-zUuSJEboYFjm-5KSLfuRYiRS3Y",
-  authDomain: "modern-blog-today.firebaseapp.com",
-  projectId: "modern-blog-today",
-  storageBucket: "modern-blog-today.appspot.com",
-  messagingSenderId: "131140930493",
-  appId: "1:131140930493:web:a3b38f112fd641bb6620d4",
-  measurementId: "G-K0WGPBRG9Q",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
