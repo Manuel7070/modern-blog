@@ -120,16 +120,6 @@ function Dashboard() {
           <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
             Dashboard
           </h2>
-          <ul>
-            <li className="mb-4">
-              <a
-                href="/dashboard"
-                className="text-gray-700 dark:text-gray-300 hover:underline"
-              >
-                My Posts
-              </a>
-            </li>
-          </ul>
         </div>
         <div className="flex-1 p-6">
           <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
