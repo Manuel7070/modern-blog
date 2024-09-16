@@ -1,17 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../firebase/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
 function BlogList({ posts }) {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userNames, setUserNames] = useState({});
   const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      const names = {};
+      const fetchPromises = posts.map(async (post) => {
+        if (post.userId) {
+          try {
+            const userDoc = await getDoc(doc(db, "users", post.userId));
+            if (userDoc.exists()) {
+              names[post.userId] = userDoc.data().name || "No name";
+            } else {
+              names[post.userId] = "User not found";
+            }
+          } catch (error) {
+            names[post.userId] = "Error fetching name";
+          }
+        }
+      });
+
+      await Promise.all(fetchPromises);
+      setUserNames(names);
+    };
+
+    fetchUserNames();
+  }, [posts]);
+
   const openModal = async (post) => {
     setSelectedPost(post);
     setIsModalOpen(true);
 
-    // Log the post click event
     if (user) {
       try {
         await setDoc(
@@ -66,6 +92,12 @@ function BlogList({ posts }) {
               <p className="text-gray-500 dark:text-gray-400 text-sm">
                 {post.date}
               </p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+                Posted by:{" "}
+                <span className="font-semibold">
+                  {userNames[post.userId] || "Unknown"}
+                </span>
+              </p>
             </div>
           </div>
         ))}
@@ -89,6 +121,12 @@ function BlogList({ posts }) {
             </p>
             <p className="text-gray-500 dark:text-gray-400 text-sm">
               {selectedPost.date}
+            </p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+              Posted by:{" "}
+              <span className="font-semibold">
+                {userNames[selectedPost.userId] || "Unknown"}
+              </span>
             </p>
             <button
               onClick={closeModal}

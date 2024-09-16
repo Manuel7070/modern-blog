@@ -3,8 +3,10 @@ import { PhotographIcon } from "@heroicons/react/outline";
 import { storage, db } from "../firebase/firebase"; // Firebase config file
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext"; // Import the auth context
 
 function Post() {
+  const { user } = useAuth(); // Get the current user from auth context
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
@@ -25,7 +27,8 @@ function Post() {
   };
 
   const handlePostSubmit = async () => {
-    if (title && description) {
+    if (title && description && user) {
+      // Ensure user is defined
       setIsUploading(true);
       let imageDownloadUrl = "";
 
@@ -62,6 +65,7 @@ function Post() {
           date: currentDate, // Automatically insert the current date
           imageUrl: imageDownloadUrl || null,
           timestamp: serverTimestamp(),
+          userId: user.uid, // Include userId in the post
         });
 
         setTitle("");
@@ -74,7 +78,7 @@ function Post() {
         console.error("Error adding post: ", error);
       }
     } else {
-      console.error("All fields are required.");
+      console.error("All fields are required and user must be logged in.");
     }
   };
 
