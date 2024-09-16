@@ -56,16 +56,15 @@ function Post() {
           });
         }
 
-        // Get current date and format it (e.g., YYYY-MM-DD)
-        const currentDate = new Date().toLocaleDateString("en-CA"); // 'en-CA' for YYYY-MM-DD format
+        const currentDate = new Date().toLocaleDateString("en-CA");
 
         await addDoc(collection(db, "posts"), {
           title,
           description,
-          date: currentDate, // Automatically insert the current date
+          date: currentDate,
           imageUrl: imageDownloadUrl || null,
           timestamp: serverTimestamp(),
-          userId: user.uid, // Include userId in the post
+          userId: user.uid,
         });
 
         setTitle("");
@@ -83,7 +82,7 @@ function Post() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md max-w-xl mx-auto mb-6">
+    <div className="bg-white dark:bg-gray-800 p-4 mt-10 rounded-lg shadow-md max-w-xl mx-auto mb-6">
       <div className="flex flex-col space-y-3">
         <input
           className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 border-0 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
@@ -104,7 +103,7 @@ function Post() {
       <div className="flex justify-between items-center mt-3">
         <label className="flex items-center space-x-1 text-blue-500 dark:text-blue-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 cursor-pointer">
           <PhotographIcon className="w-5 h-5" />
-          <span className="text-sm">Photo</span>
+          <span className="text-sm">Header Image</span>
           <input
             type="file"
             accept="image/*"
