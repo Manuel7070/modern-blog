@@ -85,14 +85,14 @@ function Post() {
     <div className="bg-white dark:bg-gray-800 p-4 mt-10 rounded-lg shadow-md max-w-xl mx-auto mb-6">
       <div className="flex flex-col space-y-3">
         <input
-          className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 border-0 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          className="bg-white-100 dark:bg-white-700 rounded-lg p-3 border-0 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
           type="text"
           placeholder="Title"
           value={title}
           onChange={handleTitleChange}
         />
         <textarea
-          className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 resize-none border-0 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          className="bg-white-100 dark:bg-white-700 rounded-lg p-3 resize-none border-0 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
           rows="3"
           placeholder="Description"
           value={description}
