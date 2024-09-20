@@ -10,22 +10,24 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
+import { TrashIcon } from "@heroicons/react/solid";
 
 function Dashboard() {
   const [posts, setPosts] = useState([]);
-  const [clickedPosts, setClickedPosts] = useState([]);
+  const [clickedPosts, setClickedPosts] = useState([]); // For liked posts
   const [loading, setLoading] = useState(true);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null); // Post to be edited
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const { user } = useAuth();
 
+  // Fetch all posts for "My Posts" section
   useEffect(() => {
     const fetchUserPosts = async () => {
       setLoading(true);
       try {
         const postsQuery = query(
           collection(db, "posts"),
-          where("userId", "==", user.uid)
+          where("userId", "==", user.uid) // Filter posts by user ID
         );
         const querySnapshot = await getDocs(postsQuery);
         const userPosts = querySnapshot.docs.map((doc) => ({
@@ -44,6 +46,7 @@ function Dashboard() {
     }
   }, [user]);
 
+  // Fetch liked posts for the "Read Posts" section
   useEffect(() => {
     if (user) {
       const fetchClickedPosts = async () => {
@@ -73,6 +76,7 @@ function Dashboard() {
     }
   }, [user, posts]);
 
+  // Handle post deletion from Firestore (My Posts)
   const handleDelete = async (postId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this post?"
@@ -80,18 +84,43 @@ function Dashboard() {
     if (confirmDelete) {
       try {
         await deleteDoc(doc(db, "posts", postId));
-        setPosts(posts.filter((post) => post.id !== postId));
+        setPosts(posts.filter((post) => post.id !== postId)); // Remove deleted post from state
       } catch (error) {
         console.error("Error deleting post: ", error);
       }
     }
   };
 
-  const handleEdit = (post) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
+  // Remove a post from the liked posts (userInteractions)
+  const handleRemoveFromLiked = async (postId) => {
+    try {
+      const userInteractionsRef = doc(db, "userInteractions", user.uid);
+      const userInteractionsSnapshot = await getDocs(
+        collection(db, "userInteractions")
+      );
+      const userInteractions = userInteractionsSnapshot.docs.find(
+        (doc) => doc.id === user.uid
+      );
+
+      if (userInteractions) {
+        const userData = userInteractions.data();
+        delete userData[postId]; // Remove the post from the user's liked posts
+
+        await updateDoc(userInteractionsRef, userData); // Update Firestore
+        setClickedPosts(clickedPosts.filter((post) => post.id !== postId)); // Update local state
+      }
+    } catch (error) {
+      console.error("Error removing liked post: ", error);
+    }
   };
 
+  // Open modal to edit a post
+  const handleEdit = (post) => {
+    setSelectedPost(post);
+    setIsModalOpen(true); // Open the modal
+  };
+
+  // Handle post update in Firestore
   const handleUpdate = async () => {
     try {
       const postRef = doc(db, "posts", selectedPost.id);
@@ -101,13 +130,14 @@ function Dashboard() {
       });
       setPosts(
         posts.map((post) => (post.id === selectedPost.id ? selectedPost : post))
-      );
-      setIsModalOpen(false);
+      ); // Update local state
+      setIsModalOpen(false); // Close the modal
     } catch (error) {
       console.error("Error updating post: ", error);
     }
   };
 
+  // Handle modal input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSelectedPost({ ...selectedPost, [name]: value });
@@ -116,11 +146,32 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="flex">
+        {/* Sidebar */}
         <div className="w-64 bg-white dark:bg-gray-800 p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
             Dashboard
           </h2>
+          <ul>
+            <li className="mb-4">
+              <a
+                href="/dashboard"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
+              >
+                Read Posts
+              </a>
+            </li>
+            <li className="mb-4">
+              <a
+                href="/dashboard/my-posts"
+                className="text-gray-700 dark:text-gray-300 hover:underline"
+              >
+                My Posts
+              </a>
+            </li>
+          </ul>
         </div>
+
+        {/* Main Content */}
         <div className="flex-1 p-6">
           <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
             Clicked Posts (Liked)
@@ -153,6 +204,12 @@ function Dashboard() {
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       {post.date}
                     </p>
+                    <button
+                      onClick={() => handleRemoveFromLiked(post.id)}
+                      className="text-red-500 hover:text-red-600 mt-2 flex items-center"
+                    >
+                      <TrashIcon className="w-5 h-5 mr-1" /> Remove from Liked
+                    </button>
                   </div>
                 </div>
               ))}
@@ -214,15 +271,16 @@ function Dashboard() {
             </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-300">
-              No posts available.
+              You haven't posted anything yet.
             </p>
           )}
         </div>
       </div>
 
+      {/* Modal for editing posts */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
               Edit Post
             </h2>
