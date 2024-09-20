@@ -143,6 +143,18 @@ function Dashboard() {
     setSelectedPost({ ...selectedPost, [name]: value });
   };
 
+  // State to track expanded posts
+  const [expandedPosts, setExpandedPosts] = useState([]);
+
+  // Toggle read more/less
+  const handleToggleReadMore = (postId) => {
+    setExpandedPosts((prevState) =>
+      prevState.includes(postId)
+        ? prevState.filter((id) => id !== postId)
+        : [...prevState, postId]
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="flex">
@@ -199,8 +211,20 @@ function Dashboard() {
                       {post.title}
                     </h2>
                     <p className="text-gray-600 dark:text-gray-300 mb-2">
-                      {post.description}
+                      {expandedPosts.includes(post.id)
+                        ? post.description
+                        : post.description.slice(0, 100) + "..."}
                     </p>
+                    {post.description.length > 100 && (
+                      <button
+                        onClick={() => handleToggleReadMore(post.id)}
+                        className="text-blue-500 hover:underline"
+                      >
+                        {expandedPosts.includes(post.id)
+                          ? "Read Less"
+                          : "Read More"}
+                      </button>
+                    )}
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       {post.date}
                     </p>
@@ -246,84 +270,40 @@ function Dashboard() {
                       {post.title}
                     </h2>
                     <p className="text-gray-600 dark:text-gray-300 mb-2">
-                      {post.description}
+                      {expandedPosts.includes(post.id)
+                        ? post.description
+                        : post.description.slice(0, 100) + "..."}
                     </p>
+                    {post.description.length > 100 && (
+                      <button
+                        onClick={() => handleToggleReadMore(post.id)}
+                        className="text-blue-500 hover:underline"
+                      >
+                        {expandedPosts.includes(post.id)
+                          ? "Read Less"
+                          : "Read More"}
+                      </button>
+                    )}
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       {post.date}
                     </p>
-                    <div className="mt-4 flex justify-between">
-                      <button
-                        onClick={() => handleEdit(post)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDelete(post.id)}
+                      className="text-red-500 hover:text-red-600 mt-2 flex items-center"
+                    >
+                      <TrashIcon className="w-5 h-5 mr-1" /> Delete Post
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-300">
-              You haven't posted anything yet.
+              You haven't made any posts yet.
             </p>
           )}
         </div>
       </div>
-
-      {/* Modal for editing posts */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-              Edit Post
-            </h2>
-            <div className="mb-4">
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={selectedPost.title}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={selectedPost.description}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={handleUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Update
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
