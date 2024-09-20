@@ -10,13 +10,17 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
-import { TrashIcon } from "@heroicons/react/solid";
+import { TrashIcon, PencilIcon } from "@heroicons/react/solid";
 
 function Dashboard() {
   const [posts, setPosts] = useState([]);
   const [clickedPosts, setClickedPosts] = useState([]); // For liked posts
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+
+  const [editPost, setEditPost] = useState(null); // For editing posts
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
 
   const readPostsRef = useRef(null); // Ref for Read Posts section
   const myPostsRef = useRef(null); // Ref for My Posts section
@@ -80,6 +84,43 @@ function Dashboard() {
   // Handle navigation to sections
   const scrollToSection = (ref) => {
     ref.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Handle deleting a post
+  const handleDeletePost = async (postId) => {
+    try {
+      await deleteDoc(doc(db, "posts", postId));
+      setPosts(posts.filter((post) => post.id !== postId));
+    } catch (error) {
+      console.error("Error deleting post: ", error);
+    }
+  };
+
+  // Handle editing a post
+  const handleEditPost = (post) => {
+    setEditPost(post);
+    setNewTitle(post.title);
+    setNewDescription(post.description);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const postRef = doc(db, "posts", editPost.id);
+      await updateDoc(postRef, {
+        title: newTitle,
+        description: newDescription,
+      });
+      setPosts(
+        posts.map((post) =>
+          post.id === editPost.id
+            ? { ...post, title: newTitle, description: newDescription }
+            : post
+        )
+      );
+      setEditPost(null); // Close the modal after saving
+    } catch (error) {
+      console.error("Error updating post: ", error);
+    }
   };
 
   return (
@@ -186,6 +227,21 @@ function Dashboard() {
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       {post.date}
                     </p>
+
+                    <div className="flex justify-between mt-4">
+                      <button
+                        onClick={() => handleEditPost(post)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -197,6 +253,41 @@ function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Edit Post Modal */}
+      {editPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Edit Post</h2>
+            <input
+              type="text"
+              className="w-full p-2 mb-4 border border-gray-300 rounded"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
+            <textarea
+              className="w-full p-2 mb-4 border border-gray-300 rounded"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              rows="4"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={() => setEditPost(null)}
+                className="px-4 py-2 bg-gray-300 rounded mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
